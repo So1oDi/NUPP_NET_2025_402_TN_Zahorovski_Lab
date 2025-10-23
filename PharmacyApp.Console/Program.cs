@@ -1,32 +1,106 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using PharmacyApp.Common;
 
 namespace PharmacyApp.App
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            var service = new MedicineCrudService();
+            var service = new InMemoryCrudServiceAsync<Medicine>("medicines_async.json");
 
-            var med1 = new Medicine("Парацетамол", 10.5, 50);
-            var med2 = new Medicine("Аспірін", 8.0, 30);
-            service.Create(med1);
-            service.Create(med2);
+            DemonstrateSyncPrimitives();
 
-            Console.WriteLine("Ліки додано до БД:");
-            foreach (var medicine in service.ReadAll())
-                Console.WriteLine($"Id: {medicine.Id} | Назва: {medicine.Name}, Ціна: {medicine.Price}, Кількість: {medicine.QuantityInStock}");
+            const int total = 5555;
+            Console.WriteLine($"Паралельне створення {total} ліків...");
 
-            med1.Price = 12.0;
-            service.Update(med1);
+            var sw = Stopwatch.StartNew();
 
-            Console.WriteLine("\nПісля оновлення:");
-            foreach (var medicine in service.ReadAll())
-                Console.WriteLine($"Id: {medicine.Id} | Назва: {medicine.Name}, Ціна: {medicine.Price}, Кількість: {medicine.QuantityInStock}");
+            var meds = Enumerable.Range(0, total).Select(_ => Medicine.CreateNew()).ToList();
 
-            service.Save("medicines.json");
-            Console.WriteLine("\nЛіки збережено в 'medicines.json'.");
+            await Parallel.ForEachAsync(meds, async (med, token) =>
+            {
+                await service.CreateAsync(med);
+            });
+
+            sw.Stop();
+            Console.WriteLine($"Створено {total} об'єктів за {sw.ElapsedMilliseconds} мс");
+
+            Console.WriteLine("\nЗбереження у файл...");
+            await service.SaveAsync();
+            Console.WriteLine("medicines_async.json збережено.");
+
+            var all = (await service.ReadAllAsync()).ToList();
+            Console.WriteLine($"\nУсього ліків у пам’яті: {all.Count}");
+
+            var minPrice = all.Min(m => m.Price);
+            var maxPrice = all.Max(m => m.Price);
+            var avgPrice = all.Average(m => m.Price);
+
+            var minQty = all.Min(m => m.QuantityInStock);
+            var maxQty = all.Max(m => m.QuantityInStock);
+            var avgQty = all.Average(m => m.QuantityInStock);
+
+            Console.WriteLine("\nСтатистика цін:");
+            Console.WriteLine($"Мінімальна: {minPrice:F2}, Максимальна: {maxPrice:F2}, Середня: {avgPrice:F2}");
+
+            Console.WriteLine("\nСтатистика запасів:");
+            Console.WriteLine($"Мінімальна: {minQty}, Максимальна: {maxQty}, Середня: {avgQty:F0}");
+
+            Console.WriteLine("\nПерші 5 ліків (сторінка 1):");
+            var page1 = await service.ReadAllAsync(1, 5);
+            foreach (var m in page1)
+                Console.WriteLine($"{m.Name} — {m.Price} грн — {m.QuantityInStock} шт");
+
+            Console.WriteLine("\nРоботу завершено.");
+            Console.ReadLine();
+        }
+
+        static void DemonstrateSyncPrimitives()
+        {
+            Console.WriteLine("Демонстрація примітивів синхронізації:");
+
+            object locker = new object();
+            int counter = 0;
+            Parallel.For(0, 500, i =>
+            {
+                lock (locker)
+                {
+                    counter++;
+                }
+            });
+            Console.WriteLine($"lock: counter = {counter} (очікується 500)");
+
+            var semaphore = new SemaphoreSlim(2);
+            Parallel.For(0, 5, i =>
+            {
+                semaphore.Wait();
+                try
+                {
+                    Console.WriteLine($"Потік {Thread.CurrentThread.ManagedThreadId} виконує роботу...");
+                    Thread.Sleep(100);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            });
+            Console.WriteLine("SemaphoreSlim: завершено");
+
+            var are = new AutoResetEvent(false);
+            var t = new Thread(() =>
+            {
+                Thread.Sleep(500);
+                Console.WriteLine("AutoResetEvent: сигнал від потоку");
+                are.Set();
+            });
+            t.Start();
+            are.WaitOne();
+            Console.WriteLine("AutoResetEvent: сигнал отримано\n");
         }
     }
 }
