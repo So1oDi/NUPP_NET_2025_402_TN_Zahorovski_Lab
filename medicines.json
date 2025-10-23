@@ -1,0 +1,14 @@
+[
+  {
+    "Id": "d3b50f21-04d6-401f-89cc-bc2b9eab3707",
+    "Name": "Парацетамол",
+    "Price": 12.0,
+    "QuantityInStock": 50
+  },
+  {
+    "Id": "3b21120c-cb34-4e9a-8230-47405202872a",
+    "Name": "Аспірін",
+    "Price": 8.0,
+    "QuantityInStock": 30
+  }
+]
