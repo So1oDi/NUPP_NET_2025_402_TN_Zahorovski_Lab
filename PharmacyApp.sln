@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PharmacyApp.Common", "Pharm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PharmacyApp.Console", "PharmacyApp.Console\PharmacyApp.Console.csproj", "{55643C0E-B275-4CCF-AF98-E95BC89C8F8A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PharmacyApp.Infrastructure", "PharmacyApp.Infrastructure\PharmacyApp.Infrastructure.csproj", "{5F2C4ECC-50E3-4F76-9179-A038B8CCA294}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PharmacyApp.Nosql", "PharmacyApp.Nosql\PharmacyApp.Nosql.csproj", "{03A4ECDB-6C32-48C4-A910-BC9076362EFB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{55643C0E-B275-4CCF-AF98-E95BC89C8F8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55643C0E-B275-4CCF-AF98-E95BC89C8F8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55643C0E-B275-4CCF-AF98-E95BC89C8F8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F2C4ECC-50E3-4F76-9179-A038B8CCA294}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F2C4ECC-50E3-4F76-9179-A038B8CCA294}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F2C4ECC-50E3-4F76-9179-A038B8CCA294}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F2C4ECC-50E3-4F76-9179-A038B8CCA294}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03A4ECDB-6C32-48C4-A910-BC9076362EFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03A4ECDB-6C32-48C4-A910-BC9076362EFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03A4ECDB-6C32-48C4-A910-BC9076362EFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03A4ECDB-6C32-48C4-A910-BC9076362EFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
