@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: pharmacy-app
+    env: dotnet
+    plan: free
+    branch: lab5
+    buildCommand: dotnet publish -c Release -o publish
+    startCommand: cd publish && dotnet Pharmacy.REST.dll
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: JWT_KEY
+        generateValue: true
+      - key: JWT_ISSUER
+        value: PharmacyApp
+      - key: JWT_AUDIENCE
+        value: PharmacyAppUsers
+
+databases:
+  - name: pharmacy_db
+    plan: free
+    databaseName: pharmacy
+    ipAllowList: []

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PharmacyApp.Infrastructure.Models;
 using PharmacyApp.Infrastructure.Services;
@@ -21,6 +22,7 @@ public class PrescriptionsController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = "RequirePharmacistRole")]
     public async Task<ActionResult<IEnumerable<PrescriptionDto>>> GetPrescriptions()
     {
         try
@@ -47,6 +49,7 @@ public class PrescriptionsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Policy = "RequireCustomerRole")]
     public async Task<ActionResult<PrescriptionDto>> GetPrescription(int id)
     {
         try
@@ -78,6 +81,7 @@ public class PrescriptionsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "RequireCustomerRole")]
     public async Task<ActionResult<PrescriptionDto>> CreatePrescription(CreatePrescriptionDto createDto)
     {
         try
@@ -119,6 +123,7 @@ public class PrescriptionsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = "RequirePharmacistRole")]
     public async Task<IActionResult> UpdatePrescription(int id, UpdatePrescriptionDto updateDto)
     {
         try
@@ -151,6 +156,7 @@ public class PrescriptionsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Policy = "RequireAdminRole")]
     public async Task<IActionResult> DeletePrescription(int id)
     {
         try
