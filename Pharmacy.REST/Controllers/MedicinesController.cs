@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PharmacyApp.Infrastructure.Models;
 using PharmacyApp.Infrastructure.Services;
@@ -21,6 +22,7 @@ public class MedicinesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<MedicineDto>>> GetMedicines()
     {
         try
@@ -44,6 +46,7 @@ public class MedicinesController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<ActionResult<MedicineDto>> GetMedicine(int id)
     {
         try
@@ -72,6 +75,7 @@ public class MedicinesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "RequirePharmacistRole")]
     public async Task<ActionResult<MedicineDto>> CreateMedicine(CreateMedicineDto createDto)
     {
         try
@@ -107,6 +111,7 @@ public class MedicinesController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = "RequirePharmacistRole")]
     public async Task<IActionResult> UpdateMedicine(int id, UpdateMedicineDto updateDto)
     {
         try
@@ -137,6 +142,7 @@ public class MedicinesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Policy = "RequireAdminRole")]
     public async Task<IActionResult> DeleteMedicine(int id)
     {
         try
@@ -163,6 +169,7 @@ public class MedicinesController : ControllerBase
     }
 
     [HttpGet("paged")]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<MedicineDto>>> GetMedicinesPaged(
         [FromQuery] int page = 1, 
         [FromQuery] int amount = 10)
