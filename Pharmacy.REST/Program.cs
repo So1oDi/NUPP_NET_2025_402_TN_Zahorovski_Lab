@@ -24,7 +24,7 @@ builder.Services.AddSwaggerGen(options =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -36,19 +36,14 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
-if (string.IsNullOrEmpty(connectionString))
+var dbPath = "/app/Data/PharmacyApp.db";
+if (!File.Exists(dbPath))
 {
-    var rootPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "../../.."));
-    var dbPath = Path.Combine(rootPath, "PharmacyApp.db");
-    builder.Services.AddDbContext<PharmacyAppContext>(options =>
-        options.UseSqlite($"Data Source={dbPath}"));
+    dbPath = "Data/PharmacyApp.db";
 }
-else
-{
-    builder.Services.AddDbContext<PharmacyAppContext>(options =>
-        options.UseNpgsql(connectionString));
-}
+
+builder.Services.AddDbContext<PharmacyAppContext>(options =>
+    options.UseSqlite($"Data Source={dbPath}"));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -60,6 +55,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<PharmacyAppContext>()
 .AddDefaultTokenProviders();
+
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? "YourSuperSecretKeyHereThatIsAtLeast32CharactersLong!";
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "PharmacyApp";
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "PharmacyAppUsers";
 
 builder.Services.AddAuthentication(options =>
 {
@@ -74,10 +73,9 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "PharmacyApp",
-        ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "PharmacyAppUsers",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-            Environment.GetEnvironmentVariable("JWT_KEY") ?? "YourSuperSecretKeyHereThatIsAtLeast32CharactersLong!"))
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });
 
@@ -109,7 +107,6 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-    // Create roles
     string[] roleNames = { "Admin", "Pharmacist", "Customer" };
     foreach (var roleName in roleNames)
     {
@@ -136,6 +133,12 @@ using (var scope = app.Services.CreateScope())
             await userManager.AddToRolesAsync(user, new[] { "Admin", "Pharmacist" });
         }
     }
+}
+
+var dataDir = Path.GetDirectoryName(dbPath);
+if (!string.IsNullOrEmpty(dataDir) && !Directory.Exists(dataDir))
+{
+    Directory.CreateDirectory(dataDir);
 }
 
 app.Run();
